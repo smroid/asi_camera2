@@ -1,6 +1,9 @@
 use std::ffi::CStr;
 use asi_camera2::asi_camera2_sdk;
 
+// Simple tool to enumerate the attached ASI camera(s) and print information
+// about each.
+
 fn main() {
     let num_cameras = asi_camera2_sdk::num_connected_asi_cameras();
     println!("num_cameras: {}", num_cameras);

@@ -6,6 +6,9 @@ use image::GrayImage;
 
 use asi_camera2::asi_camera2_sdk;
 
+// Simple tool to use single-exposure mode to capture a greyscale image from the
+// attached ASI camera.
+
 fn main() {
     let num_cameras = asi_camera2_sdk::num_connected_asi_cameras();
     if num_cameras == 0 {
@@ -25,6 +28,11 @@ fn main() {
     // Allocate buffer to receive camera data.
     println!("width/height: {}/{}", width, height);
     let mut pixels = vec![0u8; (width*height).try_into().unwrap()];
+
+    // Set ROI: whole sensor, no binning, greyscale.
+    camera.set_roi_format(
+        width as i32, height as i32,
+        /*bin=*/1, asi_camera2_sdk::ASI_IMG_TYPE_ASI_IMG_RAW8).unwrap();
 
     let exposure_time_millisec = 5;
     camera.set_control_value(asi_camera2_sdk::ASI_CONTROL_TYPE_ASI_EXPOSURE,

@@ -115,8 +115,36 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        // TODO: get_roi_format()
-        // TODO: set_roi_format()
+        // The return value is (width, height, bin, img_type).
+        pub fn get_roi_format(&self)
+                              -> Result<(i32, i32, i32, ASI_IMG_TYPE), ASIError> {
+            let mut width = 0;
+            let mut height = 0;
+            let mut bin = 0;
+            let mut img_type:ASI_IMG_TYPE = ASI_IMG_TYPE_ASI_IMG_RAW8;
+            let err = unsafe { ASIGetROIFormat(
+                self.camera_id, &mut width, &mut height, &mut bin, &mut img_type)
+            };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok((width, height, bin, img_type))
+            }
+        }
+
+        pub fn set_roi_format(&mut self, width: i32, height: i32,
+                              bin: i32, img_type:ASI_IMG_TYPE)
+                              -> Result<(), ASIError> {
+            let err = unsafe { ASISetROIFormat(
+                self.camera_id, width, height, bin, img_type)
+            };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(())
+            }
+        }
+
         // TODO: get_start_pos()
         // TODO: set_start_pos()
         // TODO: get_dropped_frames()
@@ -128,7 +156,7 @@ pub mod asi_camera2_sdk {
         // TODO: pulse_guide_on()
         // TODO: pulse_guide_off()
 
-        // is_dark is relevant only if the camera has a shutter.
+        // is_dark is relevant only if the camera has a mechanical shutter.
         pub fn start_exposure(&mut self, is_dark: bool) -> Result<(), ASIError> {
             let err = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
             if err != 0 {
