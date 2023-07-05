@@ -88,9 +88,96 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        // TODO: additional methods.
+        // The return value is the control's value and whether it is automatic.
+        pub fn get_control_value(&self, control_type: ASI_CONTROL_TYPE)
+                                 -> Result<(i64, bool), ASIError> {
+            let mut value: i64 = 0;
+            let mut auto: i32 = 0;
+            let err = unsafe { ASIGetControlValue(
+                self.camera_id, control_type.try_into().unwrap(), &mut value, &mut auto)
+            };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok((value, auto != 0))
+            }
+        }
+
+        pub fn set_control_value(&mut self, control_type: ASI_CONTROL_TYPE,
+                                 value: i64, auto: bool) -> Result<(), ASIError> {
+            let err = unsafe { ASISetControlValue(
+                self.camera_id, control_type.try_into().unwrap(), value, auto as i32)
+            };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(())
+            }
+        }
+
+        // TODO: get_roi_format()
+        // TODO: set_roi_format()
+        // TODO: get_start_pos()
+        // TODO: set_start_pos()
+        // TODO: get_dropped_frames()
+        // TODO: enable_dark_subtract()
+        // TODO: disable_dark_subtract()
+        // TODO: start_video_capture()
+        // TODO: stop_video_capture()
+        // TODO: get_video_data()
+        // TODO: pulse_guide_on()
+        // TODO: pulse_guide_off()
+
+        // is_dark is relevant only if the camera has a shutter.
+        pub fn start_exposure(&mut self, is_dark: bool) -> Result<(), ASIError> {
+            let err = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(())
+            }
+        }
+
+        pub fn stop_exposure(&mut self) -> Result<(), ASIError> {
+            let err = unsafe { ASIStopExposure(self.camera_id) };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(())
+            }
+        }
+
+        pub fn get_exp_status(&self) -> Result<ASI_EXPOSURE_STATUS, ASIError> {
+            let mut exp_status: ASI_EXPOSURE_STATUS = ASI_EXPOSURE_STATUS_ASI_EXP_IDLE;
+            let err = unsafe { ASIGetExpStatus(self.camera_id, &mut exp_status) };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(exp_status)
+            }
+        }
+
+        pub fn get_data_after_exp(&self, buffer: *mut u8, buff_size: i64)
+                                  -> Result<(), ASIError> {
+            let err = unsafe { ASIGetDataAfterExp(self.camera_id, buffer, buff_size) };
+            if err != 0 {
+                Err(ASIError{error_code: err.try_into().unwrap()})
+            } else {
+                Ok(())
+            }
+        }
+
+        // TODO: get_id()
+        // TODO: set_id()
+        // TODO: camera_check()
+        // TODO: get_sdk_version()
+        // TODO: get_camera_support_mode()
+        // TODO: get_camera_mode()
+        // TODO: set_camera_mode()
+        // TODO: send_soft_trigger()
     }  // impl ASICamera
 
+    // Arrange to call close() when ASICamera goes out of scope.
     impl Drop for ASICamera {
         fn drop(&mut self) {
             self.close().unwrap_or_else(|err| {
@@ -150,7 +237,7 @@ pub mod asi_camera2_sdk {
 
     impl fmt::Debug for ASIError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "{}", self)
+            write!(f, "{}", self)  // Just re-use Display.
         }
     }
 
