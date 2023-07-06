@@ -42,7 +42,7 @@ fn main() {
     camera.start_exposure(/*is_dark=*/false).unwrap();
     sleep(Duration::from_millis(exposure_time_millisec as u64));
     // Note: in single-exposure mode, the ASI camera seems to take ~300ms to reach
-    // ASI_EXP_SUCCESS state, even if the camera exposure time is mush shorter.
+    // ASI_EXP_SUCCESS state, even if the camera exposure time is much shorter.
     loop {
         let exp_status = camera.get_exp_status().unwrap();
         if exp_status == asi_camera2_sdk::ASI_EXPOSURE_STATUS_ASI_EXP_WORKING {

@@ -20,9 +20,9 @@ pub mod asi_camera2_sdk {
 
     impl ASICamera {
         pub fn open(&mut self) -> Result<(), ASIError> {
-            let err = unsafe{ ASIOpenCamera(self.camera_id) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 self.opened = true;
                 Ok(())
@@ -30,9 +30,9 @@ pub mod asi_camera2_sdk {
         }
 
         pub fn init(&self) -> Result<(), ASIError> {
-            let err = unsafe{ ASIInitCamera(self.camera_id) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe{ ASIInitCamera(self.camera_id) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
@@ -40,9 +40,9 @@ pub mod asi_camera2_sdk {
 
         pub fn close(&mut self) -> Result<(), ASIError> {
             if self.opened {
-                let err = unsafe{ ASICloseCamera(self.camera_id) };
-                if err != 0 {
-                    return Err(ASIError{error_code: err.try_into().unwrap()})
+                let error_code = unsafe{ ASICloseCamera(self.camera_id) };
+                if error_code != 0 {
+                    return Err(ASIError{error_code})
                 }
             }
             self.opened = false;
@@ -52,11 +52,11 @@ pub mod asi_camera2_sdk {
         pub fn get_property(&self) -> Result<ASI_CAMERA_INFO, ASIError> {
             let mut uninit_camera_info: MaybeUninit<ASI_CAMERA_INFO> =
                 MaybeUninit::zeroed();
-            let err = unsafe { ASIGetCameraProperty(
+            let error_code = unsafe { ASIGetCameraProperty(
                 &mut *uninit_camera_info.as_mut_ptr(), self.camera_id)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(unsafe{ uninit_camera_info.assume_init() })
             }
@@ -64,11 +64,11 @@ pub mod asi_camera2_sdk {
 
         pub fn get_num_controls(&self) -> Result<i32, ASIError> {
             let mut num_controls = 0;
-            let err = unsafe {
+            let error_code = unsafe {
                 ASIGetNumOfControls(self.camera_id, &mut num_controls)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(num_controls)
             }
@@ -78,11 +78,11 @@ pub mod asi_camera2_sdk {
                                 -> Result<ASI_CONTROL_CAPS, ASIError> {
             let mut uninit_control_caps: MaybeUninit<ASI_CONTROL_CAPS> =
                 MaybeUninit::zeroed();
-            let err = unsafe { ASIGetControlCaps(
+            let error_code = unsafe { ASIGetControlCaps(
                 self.camera_id, control_index, &mut *uninit_control_caps.as_mut_ptr())
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(unsafe{ uninit_control_caps.assume_init() })
             }
@@ -93,11 +93,11 @@ pub mod asi_camera2_sdk {
                                  -> Result<(i64, bool), ASIError> {
             let mut value: i64 = 0;
             let mut auto: i32 = 0;
-            let err = unsafe { ASIGetControlValue(
+            let error_code = unsafe { ASIGetControlValue(
                 self.camera_id, control_type.try_into().unwrap(), &mut value, &mut auto)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok((value, auto != 0))
             }
@@ -105,11 +105,11 @@ pub mod asi_camera2_sdk {
 
         pub fn set_control_value(&mut self, control_type: ASI_CONTROL_TYPE,
                                  value: i64, auto: bool) -> Result<(), ASIError> {
-            let err = unsafe { ASISetControlValue(
+            let error_code = unsafe { ASISetControlValue(
                 self.camera_id, control_type.try_into().unwrap(), value, auto as i32)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
@@ -122,11 +122,11 @@ pub mod asi_camera2_sdk {
             let mut height = 0;
             let mut bin = 0;
             let mut img_type:ASI_IMG_TYPE = ASI_IMG_TYPE_ASI_IMG_RAW8;
-            let err = unsafe { ASIGetROIFormat(
+            let error_code = unsafe { ASIGetROIFormat(
                 self.camera_id, &mut width, &mut height, &mut bin, &mut img_type)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok((width, height, bin, img_type))
             }
@@ -135,41 +135,103 @@ pub mod asi_camera2_sdk {
         pub fn set_roi_format(&mut self, width: i32, height: i32,
                               bin: i32, img_type:ASI_IMG_TYPE)
                               -> Result<(), ASIError> {
-            let err = unsafe { ASISetROIFormat(
+            let error_code = unsafe { ASISetROIFormat(
                 self.camera_id, width, height, bin, img_type)
             };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
         }
 
-        // TODO: get_start_pos()
-        // TODO: set_start_pos()
-        // TODO: get_dropped_frames()
+        // The return value is (x, y).
+        pub fn get_start_pos(&self) -> Result<(i32, i32), ASIError> {
+            let mut start_x = 0;
+            let mut start_y = 0;
+            let error_code = unsafe { ASIGetStartPos(
+                self.camera_id, &mut start_x, &mut start_y)
+            };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok((start_x, start_y))
+            }
+        }
+
+        pub fn set_start_pos(&mut self, start_x: i32, start_y: i32)
+                             -> Result<(), ASIError> {
+            let error_code = unsafe { ASISetStartPos(
+                self.camera_id, start_x, start_y)
+            };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok(())
+            }
+        }
+
+        pub fn get_dropped_frames(&self) -> Result<i32, ASIError> {
+            let mut dropped_frames: i32 = 0;
+            let error_code = unsafe { ASIGetDroppedFrames(
+                self.camera_id, &mut dropped_frames)
+            };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok(dropped_frames)
+            }
+        }
+
         // TODO: enable_dark_subtract()
         // TODO: disable_dark_subtract()
-        // TODO: start_video_capture()
-        // TODO: stop_video_capture()
-        // TODO: get_video_data()
+
+        pub fn start_video_capture(&mut self) -> Result<(), ASIError> {
+            let error_code = unsafe { ASIStartVideoCapture(self.camera_id) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok(())
+            }
+        }
+
+        pub fn stop_video_capture(&mut self) -> Result<(), ASIError> {
+            let error_code = unsafe { ASIStopVideoCapture(self.camera_id) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok(())
+            }
+        }
+
+        pub fn get_video_data(&self, buffer: *mut u8, buff_size: i64, wait_ms: i32)
+                                  -> Result<(), ASIError> {
+            let error_code = unsafe { ASIGetVideoData(
+                self.camera_id, buffer, buff_size, wait_ms) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
+            } else {
+                Ok(())
+            }
+        }
+
         // TODO: pulse_guide_on()
         // TODO: pulse_guide_off()
 
         // is_dark is relevant only if the camera has a mechanical shutter.
         pub fn start_exposure(&mut self, is_dark: bool) -> Result<(), ASIError> {
-            let err = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
         }
 
         pub fn stop_exposure(&mut self) -> Result<(), ASIError> {
-            let err = unsafe { ASIStopExposure(self.camera_id) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe { ASIStopExposure(self.camera_id) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
@@ -177,9 +239,9 @@ pub mod asi_camera2_sdk {
 
         pub fn get_exp_status(&self) -> Result<ASI_EXPOSURE_STATUS, ASIError> {
             let mut exp_status: ASI_EXPOSURE_STATUS = ASI_EXPOSURE_STATUS_ASI_EXP_IDLE;
-            let err = unsafe { ASIGetExpStatus(self.camera_id, &mut exp_status) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe { ASIGetExpStatus(self.camera_id, &mut exp_status) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(exp_status)
             }
@@ -187,9 +249,10 @@ pub mod asi_camera2_sdk {
 
         pub fn get_data_after_exp(&self, buffer: *mut u8, buff_size: i64)
                                   -> Result<(), ASIError> {
-            let err = unsafe { ASIGetDataAfterExp(self.camera_id, buffer, buff_size) };
-            if err != 0 {
-                Err(ASIError{error_code: err.try_into().unwrap()})
+            let error_code = unsafe { ASIGetDataAfterExp(
+                self.camera_id, buffer, buff_size) };
+            if error_code != 0 {
+                Err(ASIError{error_code})
             } else {
                 Ok(())
             }
@@ -205,7 +268,7 @@ pub mod asi_camera2_sdk {
         // TODO: send_soft_trigger()
     }  // impl ASICamera
 
-    // Arrange to call close() when ASICamera goes out of scope.
+    // Arrange to call close() when ASICamera object goes out of scope.
     impl Drop for ASICamera {
         fn drop(&mut self) {
             self.close().unwrap_or_else(|err| {
@@ -228,12 +291,12 @@ pub mod asi_camera2_sdk {
     }
 
     pub struct ASIError {
-      error_code: u32
+      error_code: i32
     }
 
     impl fmt::Display for ASIError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            let msg = match self.error_code {
+            let msg = match self.error_code as u32 {
                 ASI_ERROR_CODE_ASI_SUCCESS => "OK",
                 ASI_ERROR_CODE_ASI_ERROR_INVALID_INDEX =>
                     "No camera connected or index value out of boundary",
