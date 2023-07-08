@@ -2,9 +2,13 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+/// The asi_camera2_sdk module provides a thin wrapper of the ASI Camera2 SDK.
+/// Aside from making the ASI camera SDK callable from Rust, the only value adds
+/// are:
+/// * ASIError type (instead of a raw integer code)
+/// * Drop trait s.t. when an ASICamera instance goes out of scope it closes
+///   the camera.
 pub mod asi_camera2_sdk {
-    // This module provides a thin wrapper of the ASI Camera2 SDK.
-    // TODO: pointer to usage examples.
 
     use std::fmt;
     use std::error::Error;
@@ -88,7 +92,7 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        // The return value is the control's value and whether it is automatic.
+        /// The return value is the control's value and whether it is automatic.
         pub fn get_control_value(&self, control_type: ASI_CONTROL_TYPE)
                                  -> Result<(i64, bool), ASIError> {
             let mut value: i64 = 0;
@@ -115,7 +119,7 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        // The return value is (width, height, bin, img_type).
+        /// The return value is (width, height, bin, img_type).
         pub fn get_roi_format(&self)
                               -> Result<(i32, i32, i32, ASI_IMG_TYPE), ASIError> {
             let mut width = 0;
@@ -145,7 +149,7 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        // The return value is (x, y).
+        /// The return value is (x, y).
         pub fn get_start_pos(&self) -> Result<(i32, i32), ASIError> {
             let mut start_x = 0;
             let mut start_y = 0;
@@ -218,7 +222,7 @@ pub mod asi_camera2_sdk {
         // TODO: pulse_guide_on()
         // TODO: pulse_guide_off()
 
-        // is_dark is relevant only if the camera has a mechanical shutter.
+        /// `is_dark` is relevant only if the camera has a mechanical shutter.
         pub fn start_exposure(&mut self, is_dark: bool) -> Result<(), ASIError> {
             let error_code = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
             if error_code != 0 {
@@ -268,7 +272,7 @@ pub mod asi_camera2_sdk {
         // TODO: send_soft_trigger()
     }  // impl ASICamera
 
-    // Arrange to call close() when ASICamera object goes out of scope.
+    /// We arrange to call close() when ASICamera object goes out of scope.
     impl Drop for ASICamera {
         fn drop(&mut self) {
             self.close().unwrap_or_else(|err| {
@@ -277,10 +281,14 @@ pub mod asi_camera2_sdk {
         }
     }
 
+    /// Returns the number of connected cameras.
     pub fn num_connected_asi_cameras() -> i32 {
         unsafe { ASIGetNumOfConnectedCameras() }
     }
 
+    /// Creates an ASICamera instance corresponding to the given `camera_id`.
+    /// The returned instance is *not* opened by this function, you need to call
+    /// open() explicitly.
     pub fn create_asi_camera(camera_id: i32) -> ASICamera {
         let num_cameras = num_connected_asi_cameras();
         if camera_id >= num_cameras {
@@ -290,6 +298,7 @@ pub mod asi_camera2_sdk {
         ASICamera{camera_id, opened: false}
     }
 
+    /// Wraps the integer error code returned by the SDK functions.
     pub struct ASIError {
       error_code: i32
     }
