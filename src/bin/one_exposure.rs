@@ -62,5 +62,5 @@ fn main() {
 
     // Move 'pixels' into a GrayImage.
     let image = GrayImage::from_raw(width as u32, height as u32, pixels).unwrap();
-    image.save("image.bmp").unwrap();
+    image.save("image.jpg").unwrap();
 }
