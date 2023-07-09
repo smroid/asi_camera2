@@ -34,3 +34,9 @@ This program opens the first ASI camera, and:
 
 This is similar to the "one_exposure" program except it operates the
 camera in video capture mode.
+
+# Dependencies
+
+This crate depends on the 'image' library, but that's only needed for
+the example binary programs. The asi_camera_sdk module itself does not
+depend on anything beside 'std::'.
