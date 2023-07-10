@@ -54,13 +54,13 @@ fn main() {
         // * Changing ROI incurs a ~250ms penalty.
         // * Changing start position incurs no time penalty.
         // * Changing exposure duration incurs no time penalty.
-        // if i == 3 {
+        if i == 3 {
         //     let update_start = Instant::now();
         //     camera.set_control_value(asi_camera2_sdk::ASI_CONTROL_TYPE_ASI_EXPOSURE,
         //                              10 * 1000,
         //                              /*auto=*/false).unwrap();
         //     println!("update took: {:?}", update_start.elapsed());
-        // }
+        }
         // Get the video data. This will block until the currently exposing frame
         // is complete.
         let get_data_start = Instant::now();

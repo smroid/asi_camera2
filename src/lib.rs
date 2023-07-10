@@ -23,6 +23,8 @@ pub mod asi_camera2_sdk {
     }
 
     impl ASICamera {
+        pub fn camera_id(&self) -> i32 { self.camera_id }
+
         pub fn open(&mut self) -> Result<(), ASIError> {
             let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
             if error_code != 0 {
