@@ -14,6 +14,8 @@ pub mod asi_camera2_sdk {
     use std::error::Error;
     use std::mem::MaybeUninit;
 
+    use log::info;
+
     include!(concat!(env!("OUT_DIR"), "/asi_sdk_bindings.rs"));
 
     #[derive(Debug)]
@@ -297,6 +299,7 @@ pub mod asi_camera2_sdk {
             panic!("Cannot create camera {} with {} cameras detected",
                    camera_id, num_cameras);
         }
+        info!("Created ASICamera id {}", camera_id);
         ASICamera{camera_id, opened: false}
     }
 
