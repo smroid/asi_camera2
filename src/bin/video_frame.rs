@@ -4,19 +4,20 @@ use std::time::Instant;
 use image::GrayImage;
 
 use asi_camera2::asi_camera2_sdk;
+use asi_camera2::asi_camera2_sdk::ASICamera;
 
 // Simple tool to use video mode to capture a single greyscale image from the
 // attached ASI camera.
 
 fn main() {
-    let num_cameras = asi_camera2_sdk::num_connected_asi_cameras();
+    let num_cameras = ASICamera::num_connected_asi_cameras();
     if num_cameras == 0 {
         panic!("No camera??");
     }
     if num_cameras > 1 {
         println!("num_cameras: {}; using first camera", num_cameras);
     }
-    let mut camera = asi_camera2_sdk::create_asi_camera(0);
+    let mut camera = ASICamera::new(0);
     camera.open().unwrap();
     camera.init().unwrap();
 

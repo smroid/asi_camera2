@@ -1,14 +1,16 @@
 use std::ffi::CStr;
+
 use asi_camera2::asi_camera2_sdk;
+use asi_camera2::asi_camera2_sdk::ASICamera;
 
 // Simple tool to enumerate the attached ASI camera(s) and print information
 // about each.
 
 fn main() {
-    let num_cameras = asi_camera2_sdk::num_connected_asi_cameras();
+    let num_cameras = ASICamera::num_connected_asi_cameras();
     println!("num_cameras: {}", num_cameras);
     for cam_index in 0..num_cameras {
-        let mut camera = asi_camera2_sdk::create_asi_camera(cam_index);
+        let mut camera = ASICamera::new(cam_index);
         println!("Camera info for index {}", cam_index);
         let camera_info = camera.get_property().unwrap();
         print_camera_info(&camera_info);

@@ -25,6 +25,24 @@ pub mod asi_camera2_sdk {
     }
 
     impl ASICamera {
+        /// Returns the number of connected cameras.
+        pub fn num_connected_asi_cameras() -> i32 {
+            unsafe { ASIGetNumOfConnectedCameras() }
+        }
+
+        /// Creates an ASICamera instance corresponding to the given `camera_id`.
+        /// The returned instance is *not* opened by this function, you need to call
+        /// open() explicitly.
+        pub fn new(camera_id: i32) -> Self {
+            let num_cameras = ASICamera::num_connected_asi_cameras();
+            if camera_id >= num_cameras {
+                panic!("Cannot create camera {} with {} cameras detected",
+                       camera_id, num_cameras);
+            }
+            info!("Created ASICamera id {}", camera_id);
+            ASICamera{camera_id, opened: false}
+        }
+
         pub fn camera_id(&self) -> i32 { self.camera_id }
 
         pub fn open(&mut self) -> Result<(), ASIError> {
@@ -283,24 +301,6 @@ pub mod asi_camera2_sdk {
                 panic!("Error closing camera id {}: {}", self.camera_id, err);
             });
         }
-    }
-
-    /// Returns the number of connected cameras.
-    pub fn num_connected_asi_cameras() -> i32 {
-        unsafe { ASIGetNumOfConnectedCameras() }
-    }
-
-    /// Creates an ASICamera instance corresponding to the given `camera_id`.
-    /// The returned instance is *not* opened by this function, you need to call
-    /// open() explicitly.
-    pub fn create_asi_camera(camera_id: i32) -> ASICamera {
-        let num_cameras = num_connected_asi_cameras();
-        if camera_id >= num_cameras {
-            panic!("Cannot create camera {} with {} cameras detected",
-                   camera_id, num_cameras);
-        }
-        info!("Created ASICamera id {}", camera_id);
-        ASICamera{camera_id, opened: false}
     }
 
     /// Wraps the integer error code returned by the SDK functions.
