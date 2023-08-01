@@ -9,7 +9,6 @@
 /// * Drop trait s.t. when an ASICamera instance goes out of scope it closes
 ///   the camera.
 pub mod asi_camera2_sdk {
-
     use std::fmt;
     use std::error::Error;
     use std::mem::MaybeUninit;
