@@ -47,7 +47,7 @@ pub mod asi_camera2_sdk {
         pub fn open(&mut self) -> Result<(), ASIError> {
             let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "open".to_string()})
             } else {
                 self.opened = true;
                 Ok(())
@@ -57,7 +57,7 @@ pub mod asi_camera2_sdk {
         pub fn init(&self) -> Result<(), ASIError> {
             let error_code = unsafe{ ASIInitCamera(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "init".to_string()})
             } else {
                 Ok(())
             }
@@ -67,7 +67,7 @@ pub mod asi_camera2_sdk {
             if self.opened {
                 let error_code = unsafe{ ASICloseCamera(self.camera_id) };
                 if error_code != 0 {
-                    return Err(ASIError{error_code})
+                    return Err(ASIError{error_code, source: "close".to_string()})
                 }
             }
             self.opened = false;
@@ -81,7 +81,7 @@ pub mod asi_camera2_sdk {
                 &mut *uninit_camera_info.as_mut_ptr(), self.camera_id)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_property".to_string()})
             } else {
                 Ok(unsafe{ uninit_camera_info.assume_init() })
             }
@@ -93,7 +93,7 @@ pub mod asi_camera2_sdk {
                 ASIGetNumOfControls(self.camera_id, &mut num_controls)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_num_controls".to_string()})
             } else {
                 Ok(num_controls)
             }
@@ -107,7 +107,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, control_index, &mut *uninit_control_caps.as_mut_ptr())
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_control_caps".to_string()})
             } else {
                 Ok(unsafe{ uninit_control_caps.assume_init() })
             }
@@ -122,7 +122,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, control_type.try_into().unwrap(), &mut value, &mut auto)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_control_value".to_string()})
             } else {
                 Ok((value, auto != 0))
             }
@@ -134,7 +134,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, control_type.try_into().unwrap(), value, auto as i32)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "set_control_value".to_string()})
             } else {
                 Ok(())
             }
@@ -151,7 +151,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, &mut width, &mut height, &mut bin, &mut img_type)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_roi_format".to_string()})
             } else {
                 Ok((width, height, bin, img_type))
             }
@@ -164,7 +164,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, width, height, bin, img_type)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "set_roi_format".to_string()})
             } else {
                 Ok(())
             }
@@ -178,7 +178,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, &mut start_x, &mut start_y)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_start_pos".to_string()})
             } else {
                 Ok((start_x, start_y))
             }
@@ -190,7 +190,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, start_x, start_y)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "set_start_pos".to_string()})
             } else {
                 Ok(())
             }
@@ -202,7 +202,7 @@ pub mod asi_camera2_sdk {
                 self.camera_id, &mut dropped_frames)
             };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_dropped_frames".to_string()})
             } else {
                 Ok(dropped_frames)
             }
@@ -214,7 +214,7 @@ pub mod asi_camera2_sdk {
         pub fn start_video_capture(&mut self) -> Result<(), ASIError> {
             let error_code = unsafe { ASIStartVideoCapture(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "start_video_capture".to_string()})
             } else {
                 Ok(())
             }
@@ -223,7 +223,7 @@ pub mod asi_camera2_sdk {
         pub fn stop_video_capture(&mut self) -> Result<(), ASIError> {
             let error_code = unsafe { ASIStopVideoCapture(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "stop_video_capture".to_string()})
             } else {
                 Ok(())
             }
@@ -234,7 +234,7 @@ pub mod asi_camera2_sdk {
             let error_code = unsafe { ASIGetVideoData(
                 self.camera_id, buffer, buff_size, wait_ms) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_video_data".to_string()})
             } else {
                 Ok(())
             }
@@ -247,7 +247,7 @@ pub mod asi_camera2_sdk {
         pub fn start_exposure(&mut self, is_dark: bool) -> Result<(), ASIError> {
             let error_code = unsafe { ASIStartExposure(self.camera_id, is_dark as i32) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "start_exposure".to_string()})
             } else {
                 Ok(())
             }
@@ -256,7 +256,7 @@ pub mod asi_camera2_sdk {
         pub fn stop_exposure(&mut self) -> Result<(), ASIError> {
             let error_code = unsafe { ASIStopExposure(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "stop_exposure".to_string()})
             } else {
                 Ok(())
             }
@@ -266,7 +266,7 @@ pub mod asi_camera2_sdk {
             let mut exp_status: ASI_EXPOSURE_STATUS = ASI_EXPOSURE_STATUS_ASI_EXP_IDLE;
             let error_code = unsafe { ASIGetExpStatus(self.camera_id, &mut exp_status) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_exp_status".to_string()})
             } else {
                 Ok(exp_status)
             }
@@ -277,7 +277,7 @@ pub mod asi_camera2_sdk {
             let error_code = unsafe { ASIGetDataAfterExp(
                 self.camera_id, buffer, buff_size) };
             if error_code != 0 {
-                Err(ASIError{error_code})
+                Err(ASIError{error_code, source: "get_data_after_exp".to_string()})
             } else {
                 Ok(())
             }
@@ -304,7 +304,8 @@ pub mod asi_camera2_sdk {
 
     /// Wraps the integer error code returned by the SDK functions.
     pub struct ASIError {
-      error_code: i32
+        error_code: i32,
+        source: String,
     }
 
     impl fmt::Display for ASIError {
@@ -335,7 +336,7 @@ pub mod asi_camera2_sdk {
                     "General error, e.g. value is out of valid range",
                 _ => "Unknown error",
             };
-            write!(f, "{} (code={})", msg, self.error_code)
+            write!(f, "{} (source={}, code={})", msg, self.source, self.error_code)
         }
     }
 
