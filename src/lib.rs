@@ -2,20 +2,33 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+mod usb_reset;
+
 /// The asi_camera2_sdk module provides a thin wrapper of the ASI Camera2 SDK.
 /// Aside from making the ASI camera SDK callable from Rust, the only value adds
 /// are:
 /// * ASIError type (instead of a raw integer code)
 /// * Drop trait s.t. when an ASICamera instance goes out of scope it closes
 ///   the camera.
+/// * Logic to Reset USB device on error.
 pub mod asi_camera2_sdk {
     use std::fmt;
     use std::error::Error;
     use std::mem::MaybeUninit;
 
-    use log::info;
+    use log::{info, warn};
+    use crate::usb_reset::usb_reset;
 
     include!(concat!(env!("OUT_DIR"), "/asi_sdk_bindings.rs"));
+
+    fn reset_asi_cameras() {
+        let ZWO_VENDOR_ID = 0x03c3;
+        if let Err(e) = usb_reset::reset_usb_device(
+            ZWO_VENDOR_ID, /*product_id=*/None)
+        {
+            warn!("Error resetting USB device: {:?}", e);
+        }
+    }
 
     #[derive(Debug)]
     pub struct ASICamera {
@@ -45,12 +58,21 @@ pub mod asi_camera2_sdk {
         pub fn camera_id(&self) -> i32 { self.camera_id }
 
         pub fn open(&mut self) -> Result<(), ASIError> {
-            let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
-            if error_code != 0 {
-                Err(ASIError{error_code, source: "open".to_string()})
-            } else {
-                self.opened = true;
-                Ok(())
+            let mut retry = false;
+            loop {
+                let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
+                if error_code == 0 {
+                    self.opened = true;
+                    return Ok(());
+                }
+                let asi_err = ASIError{error_code, source: "open".to_string()};
+                if !retry {
+                    warn!("Got error {:?}; resetting and retrying.", asi_err);
+                    reset_asi_cameras();
+                    retry = true;  // Only retry once.
+                    continue;
+                }
+                return Err(asi_err);
             }
         }
 
@@ -231,12 +253,22 @@ pub mod asi_camera2_sdk {
 
         pub fn get_video_data(&self, buffer: *mut u8, buff_size: i64, wait_ms: i32)
                                   -> Result<(), ASIError> {
-            let error_code = unsafe { ASIGetVideoData(
-                self.camera_id, buffer, buff_size, wait_ms) };
-            if error_code != 0 {
-                Err(ASIError{error_code, source: "get_video_data".to_string()})
-            } else {
-                Ok(())
+            let mut retry = false;
+            loop {
+                let error_code = unsafe {
+                    ASIGetVideoData(self.camera_id, buffer, buff_size, wait_ms)
+                };
+                if error_code == 0 {
+                    return Ok(());
+                }
+                let asi_err = ASIError{error_code, source: "get_video_data".to_string()};
+                if !retry {
+                    warn!("Got error {:?}; resetting and retrying.", asi_err);
+                    reset_asi_cameras();
+                    retry = true;  // Only retry once.
+                    continue;
+                }
+                return Err(asi_err);
             }
         }
 
