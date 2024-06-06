@@ -18,13 +18,14 @@ fn main() {
     if num_cameras > 1 {
         println!("num_cameras: {}; using first camera", num_cameras);
     }
-    let mut camera =  ASICamera::new(0);
-    camera.open().unwrap();
-    camera.init().unwrap();
 
-    let camera_info = camera.get_property().unwrap();
+    let camera_info = ASICamera::get_property(0).unwrap();
     let width = camera_info.MaxWidth;
     let height = camera_info.MaxHeight;
+
+    let mut camera = ASICamera::new(camera_info.CameraID);
+    camera.open().unwrap();
+    camera.init().unwrap();
 
     // Allocate buffer to receive camera data.
     println!("width/height: {}/{}", width, height);

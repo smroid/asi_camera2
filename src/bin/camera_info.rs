@@ -10,11 +10,11 @@ fn main() {
     let num_cameras = ASICamera::num_connected_asi_cameras();
     println!("num_cameras: {}", num_cameras);
     for cam_index in 0..num_cameras {
-        let mut camera = ASICamera::new(cam_index);
         println!("Camera info for index {}", cam_index);
-        let camera_info = camera.get_property().unwrap();
+        let camera_info = ASICamera::get_property(cam_index).unwrap();
         print_camera_info(&camera_info);
 
+        let mut camera = ASICamera::new(camera_info.CameraID);
         camera.open().unwrap();
         camera.init().unwrap();
 

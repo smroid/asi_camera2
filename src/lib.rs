@@ -38,20 +38,29 @@ pub mod asi_camera2_sdk {
     }
 
     impl ASICamera {
-        /// Returns the number of connected cameras.
+        /// Returns the number of connected ASI cameras.
         pub fn num_connected_asi_cameras() -> i32 {
             unsafe { ASIGetNumOfConnectedCameras() }
+        }
+
+        /// Get description for given camera index.
+        pub fn get_property(camera_index: i32) -> Result<ASI_CAMERA_INFO, ASIError> {
+            let mut uninit_camera_info: MaybeUninit<ASI_CAMERA_INFO> =
+                MaybeUninit::zeroed();
+            let error_code = unsafe { ASIGetCameraProperty(
+                &mut *uninit_camera_info.as_mut_ptr(), camera_index)
+            };
+            if error_code != 0 {
+                Err(ASIError{error_code, source: "get_property".to_string()})
+            } else {
+                Ok(unsafe{ uninit_camera_info.assume_init() })
+            }
         }
 
         /// Creates an ASICamera instance corresponding to the given `camera_id`.
         /// The returned instance is *not* opened by this function, you need to call
         /// open() explicitly.
         pub fn new(camera_id: i32) -> Self {
-            let num_cameras = ASICamera::num_connected_asi_cameras();
-            if camera_id >= num_cameras {
-                panic!("Cannot create camera {} with {} cameras detected",
-                       camera_id, num_cameras);
-            }
             info!("Created ASICamera id {}", camera_id);
             ASICamera{camera_id, opened: false}
         }
@@ -59,12 +68,15 @@ pub mod asi_camera2_sdk {
         pub fn camera_id(&self) -> i32 { self.camera_id }
 
         pub fn open(&mut self) -> Result<(), ASIError> {
+            if self.opened {
+                return Ok(())
+            }
             let error_code = unsafe{ ASIOpenCamera(self.camera_id) };
             if error_code != 0 {
-                Err(ASIError{error_code, source: "open".to_string()})
-            } else {
-                Ok(())
+                return Err(ASIError{error_code, source: "open".to_string()})
             }
+            self.opened = true;
+            Ok(())
         }
 
         pub fn init(&self) -> Result<(), ASIError> {
@@ -77,27 +89,15 @@ pub mod asi_camera2_sdk {
         }
 
         pub fn close(&mut self) -> Result<(), ASIError> {
-            if self.opened {
-                let error_code = unsafe{ ASICloseCamera(self.camera_id) };
-                if error_code != 0 {
-                    return Err(ASIError{error_code, source: "close".to_string()})
-                }
+            if !self.opened {
+                return Ok(())
+            }
+            let error_code = unsafe{ ASICloseCamera(self.camera_id) };
+            if error_code != 0 {
+                return Err(ASIError{error_code, source: "close".to_string()})
             }
             self.opened = false;
             Ok(())
-        }
-
-        pub fn get_property(&self) -> Result<ASI_CAMERA_INFO, ASIError> {
-            let mut uninit_camera_info: MaybeUninit<ASI_CAMERA_INFO> =
-                MaybeUninit::zeroed();
-            let error_code = unsafe { ASIGetCameraProperty(
-                &mut *uninit_camera_info.as_mut_ptr(), self.camera_id)
-            };
-            if error_code != 0 {
-                Err(ASIError{error_code, source: "get_property".to_string()})
-            } else {
-                Ok(unsafe{ uninit_camera_info.assume_init() })
-            }
         }
 
         pub fn get_num_controls(&self) -> Result<i32, ASIError> {
