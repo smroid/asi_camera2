@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 fn main() {
     // Tell cargo to look for shared libraries in the specified directory.
-    println!("cargo:rustc-link-search=$HOME/ASI_Camera_SDK/ASI_linux_mac_SDK_V1.29/lib/armv8");
+    println!("cargo:rustc-link-search=asi_sdk/ASI_linux_mac_SDK_V1.29/lib/armv8");
 
     // Tell cargo to tell rustc to link the shared library.
     println!("cargo:rustc-link-lib=ASICamera2");

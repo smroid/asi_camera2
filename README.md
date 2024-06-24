@@ -1,13 +1,5 @@
 This is a thin Rust wrapper of the ASI Camera2 SDK.
 
-# Preparation
-
-1. Download the ASI Camera SDK from ZWO's
-   [downloads page](https://www.zwoastro.com/downloads/developers).
-2. Unzip the download and make note of where the "lib" directory
-   lands.
-3. Edit build.rs to update the "cargo:rustc-link-search" setting.
-
 # Usage
 
 Please consult the binaries in src/bin for examples of how to use the
