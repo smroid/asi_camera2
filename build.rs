@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 fn main() {
     // Tell cargo to look for shared libraries in the specified directory.
+    // Note: the libraries should also be copied to /lib/aarch64-linux-gnu
     println!("cargo:rustc-link-search=asi_sdk/ASI_linux_mac_SDK_V1.29/lib/armv8");
 
     // Tell cargo to tell rustc to link the shared library.
