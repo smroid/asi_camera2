@@ -19,7 +19,7 @@ pub mod usb_reset {
                   device.address(),
                   device_desc.vendor_id(),
                   device_desc.product_id());
-            let handle = device.open()?;
+            let mut handle = device.open()?;
             handle.reset()?;
         }
 

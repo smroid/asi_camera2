@@ -2,12 +2,12 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    // Tell cargo to look for shared libraries in the specified directory.
-    // Note: the libraries should also be copied to /lib/aarch64-linux-gnu
+    // Tell cargo to look for libraries in the specified directory.
     println!("cargo:rustc-link-search=asi_sdk/ASI_linux_mac_SDK_V1.29/lib/armv8");
 
-    // Tell cargo to tell rustc to link the shared library.
-    println!("cargo:rustc-link-lib=ASICamera2");
+    // Tell cargo to tell rustc to link the library statically.
+    println!("cargo:rustc-link-lib=static=ASICamera2");
+    println!("cargo:rustc-link-lib=dylib=stdc++");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes.
     println!("cargo:rerun-if-changed=wrapper.h");
