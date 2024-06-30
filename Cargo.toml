@@ -9,7 +9,7 @@ build = "build.rs"
 [dependencies]
 log = "0.4.19"
 image = "0.25.1"
-rusb = "0.9.3"
+rusb = "0.9.4"
 
 [build-dependencies]
 bindgen = "0.66.1"
