@@ -18,6 +18,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate bindings for.
         .header("wrapper.h")
+        .clang_arg("-Iasi_sdk/ASI_linux_mac_SDK_V1.29/include")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
