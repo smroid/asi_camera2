@@ -36,10 +36,15 @@ fn main() {
         width as i32, height as i32,
         /*bin=*/1, asi_camera2_sdk::ASI_IMG_TYPE_ASI_IMG_RAW8).unwrap();
 
-    let exposure_time_millisec = 5;
+    let exposure_time_millisec = 10;
     camera.set_control_value(asi_camera2_sdk::ASI_CONTROL_TYPE_ASI_EXPOSURE,
                              exposure_time_millisec * 1000,
                              /*auto=*/false).unwrap();
+    // Invert.
+    camera.set_control_value(asi_camera2_sdk::ASI_CONTROL_TYPE_ASI_FLIP,
+                             asi_camera2_sdk::ASI_FLIP_STATUS_ASI_FLIP_BOTH as i64,
+                             /*auto=*/false).unwrap();
+
     let exp_start = Instant::now();
     camera.start_exposure(/*is_dark=*/false).unwrap();
     sleep(Duration::from_millis(exposure_time_millisec as u64));
