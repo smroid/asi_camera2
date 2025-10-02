@@ -20,7 +20,7 @@ pub mod asi_camera2_sdk {
     use std::mem::MaybeUninit;
 
     use log::{info, warn};
-    use crate::usb_reset::usb_reset;
+    use crate::usb_reset;
 
     include!(concat!(env!("OUT_DIR"), "/asi_sdk_bindings.rs"));
 
@@ -245,11 +245,9 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        pub fn get_video_data(&self, buffer: *mut u8, buff_size: i64, wait_ms: i32)
+        pub unsafe fn get_video_data(&self, buffer: *mut u8, buff_size: i64, wait_ms: i32)
                                   -> Result<(), ASIError> {
-            let error_code = unsafe {
-                ASIGetVideoData(self.camera_id, buffer, buff_size, wait_ms)
-            };
+            let error_code = ASIGetVideoData(self.camera_id, buffer, buff_size, wait_ms);
             if error_code != 0 {
                 Err(ASIError{error_code, source: "get_video_data".to_string()})
             } else {
@@ -289,10 +287,10 @@ pub mod asi_camera2_sdk {
             }
         }
 
-        pub fn get_data_after_exp(&self, buffer: *mut u8, buff_size: i64)
+        pub unsafe fn get_data_after_exp(&self, buffer: *mut u8, buff_size: i64)
                                   -> Result<(), ASIError> {
-            let error_code = unsafe { ASIGetDataAfterExp(
-                self.camera_id, buffer, buff_size) };
+            let error_code = ASIGetDataAfterExp(
+                self.camera_id, buffer, buff_size);
             if error_code != 0 {
                 Err(ASIError{error_code, source: "get_data_after_exp".to_string()})
             } else {

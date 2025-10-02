@@ -66,8 +66,10 @@ fn main() {
         // Get the video data. This will block until the currently exposing frame
         // is complete.
         let get_data_start = Instant::now();
-        camera.get_video_data(
-            pixels.as_mut_ptr(), width*height, /*wait_ms=*/-1).unwrap();
+        unsafe {
+            camera.get_video_data(
+                pixels.as_mut_ptr(), width*height, /*wait_ms=*/-1).unwrap();
+        }
         println!("get_video_data took: {:?}", get_data_start.elapsed());
     }
     let video_capture_stop = Instant::now();

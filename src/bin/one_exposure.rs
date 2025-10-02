@@ -64,7 +64,9 @@ fn main() {
     println!("Elapsed from exposure start: {:?}", exp_start.elapsed());
 
     let readout_start = Instant::now();
-    camera.get_data_after_exp(pixels.as_mut_ptr(), width*height).unwrap();
+    unsafe {
+        camera.get_data_after_exp(pixels.as_mut_ptr(), width*height).unwrap();
+    }
     println!("Elapsed from readout start: {:?}", readout_start.elapsed());
 
     // Move 'pixels' into a GrayImage.
